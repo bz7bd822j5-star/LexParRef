@@ -1,0 +1,215 @@
+{
+  "procedures": [
+    {
+      "id": 1,
+      "titre": "Fiche doctrine - engins à vitesse augmentée",
+      "resume": "Procédure de contrôle et verbalisation des EDPM débridés (trottinettes, vélos électriques) dépassant 25 km/h. Infractions, sanctions et cadre légal.",
+      "mots_cles": ["engin", "vitesse", "augmentée", "augmente", "trottinette", "électrique", "EDPM", "circulation", "débridé", "débridage", "speed", "bike", "speedbike", "vélo", "velo", "rapide", "bridage", "homologation", "25", "km/h", "kmh", "gyropode", "monoroue", "hoverboard"],
+      "date": "Septembre 2025",
+      "fichier": "Fiche doctrine - engins à vitesse augmentée - septembre 2025.pdf",
+      "type": "doctrine"
+    },
+    {
+      "id": 2,
+      "titre": "Fiche doctrine DPMP - Dépôts irréguliers",
+      "resume": "Constatation et verbalisation des dépôts sauvages, encombrants et déchets sur la voie publique. Articles R632-1, R644-2 et L541-3. Procédure PM.",
+      "mots_cles": ["dépôt", "depot", "irrégulier", "irregulier", "encombrant", "ordure", "déchet", "dechet", "poubelle", "décharge", "decharge", "sauvage", "abandon", "abandonné", "abandonne", "voie", "publique", "trottoir", "rue", "stationnement", "gênant", "genant", "DPMP", "doctrine", "procédure", "procedure", "constatation", "verbalisation", "maire", "police", "municipale", "R632-1", "R644-2", "L541-3"],
+      "date": "Octobre 2022",
+      "fichier": "Fiche_Doctrine_DPMP_depots_irreguliers_version_finale_oct_2022.pdf",
+      "type": "doctrine"
+    },
+    {
+      "id": 3,
+      "titre": "Fiche EM Police Municipale - Tuk-tuks",
+      "resume": "Réglementation applicable aux tuk-tuks et tricycles motorisés de transport de passagers. Contrôles à effectuer : permis, assurance, conformité du véhicule.",
+      "mots_cles": ["tuk", "tuk-tuk", "tricycle", "taxi", "transport", "passagers", "véhicule", "vehicule", "trois", "roues", "trois-roues", "motorisé", "motorise", "circulation", "permis", "assurance", "réglementation", "reglementation", "EM", "État-major", "Etat-major", "police", "municipale", "procédure", "procedure", "contrôle", "controle", "contrle", "vérification", "verification"],
+      "date": "Décembre 2022",
+      "fichier": "note_et_fiche_EM_Tuk_tuks_21_dec_2022.pdf",
+      "type": "doctrine"
+    },
+    {
+      "id": 4,
+      "titre": "Fiche doctrine - Vente à la sauvette",
+      "resume": "Contrôle et verbalisation de la vente ambulante non autorisée sur la voie publique. Infractions aux articles L1551-1, R1551 et L330. Procédure PM.",
+      "mots_cles": ["vente", "sauvette", "rue", "trottoir", "voie", "publique", "ambulant", "colporteur", "marchand", "marchandise", "denrée", "denree", "ali", "alimentaire", "boisson", "tabac", "alcool", "autori", "autorisation", "permis", "licence", "droit", "taxe", "défaut", "defaut", "infraction", "contravention", "L1551-1", "L1551", "R1551", "L330", "contrle", "contrôle", "vérification", "verification", "verbalisation", "procédure"],
+      "date": "Mars 2022",
+      "fichier": "Fiche doctrine - Vente à la sauvette Vdef - mars 2022.pdf",
+      "type": "doctrine"
+    },
+    {
+      "id": 5,
+      "titre": "Fiche doctrine - Terrasses",
+      "resume": "Réglementation des terrasses de bars et restaurants : autorisations, occupation du domaine public, mobilier, responsabilités. Contrôles et infractions.",
+      "mots_cles": ["terrasse", "bars", "bar", "café", "cafe", "restaurant", "terrasse", "mobilier", "table", "chaise", "parasol", "chauffage", "domaine", "publique", "public", "voie", "rue", "trottoir", "autoris", "autorisation", "licence", "permis", "occupation", "encombrement", "obstacle", "infraction", "contravention", "responsabilité", "responsabilite", "assurance", "défaut", "defaut", "maire", "police", "municipale", "procédure", "verbalisation"],
+      "date": "Juin 2022",
+      "fichier": "Fiche doctrine - Terrasses Vdef - juin 2022.pdf",
+      "type": "doctrine"
+    },
+    {
+      "id": 6,
+      "titre": "Fiche doctrine - Contrle et verbalisation des nuisances sonores liées à un chantier",
+      "resume": "Contrôle des horaires et niveaux sonores des chantiers. Articles R1334 et L1334. Infractions : travaux la nuit, le dimanche, jours fériés sans autorisation.",
+      "mots_cles": ["nuisance", "sonore", "bruit", "chantier", "construction", "btp", "travaux", "rénovation", "renovation", "décibel", "decibel", "dB", "horaire", "dimanche", "jour", "férié", "ferie", "nuit", "jour", "weekend", "infraction", "contravention", "ammende", "amende", "R1334", "L1334", "contrle", "contrôle", "vérification", "verification", "verbalisation", "procédure", "responsabilité", "responsabilite", "maire", "police", "municipale"],
+      "date": "Juin 2023",
+      "fichier": "Fiche doctrine - Contrôle et verbalisation des nuisances sonores liées à un chantier Vdef - juin 2023.pdf",
+      "type": "doctrine"
+    },
+    {
+      "id": 7,
+      "titre": "Fiche doctrine - Boîtes à clés sur le domaine public",
+      "resume": "Installation non autorisée de boîtes à clés (keysafe) sur façades et voie publique. Occupation du domaine public sans autorisation. Procédure et infractions.",
+      "mots_cles": ["boîte", "boite", "clé", "cle", "keysafe", "domaine", "public", "voie", "rue", "trottoir", "façade", "facade", "installation", "installation", "affichage", "fixation", "occupation", "encombrement", "obstacle", "infraction", "contravention", "défaut", "defaut", "autorisation", "permis", "mairie", "maire", "police", "municipale", "procédure", "verbalisation", "responsabilité", "responsabilite", "risque"],
+      "date": "Avril 2025",
+      "fichier": "Fiche doctrine - boites à clés sur le domaine public - avril 2025.pdf",
+      "type": "doctrine"
+    },
+    {
+      "id": 8,
+      "titre": "Fiche doctrine - Plaques d'immatriculation illisibles, dissimulées ou falsifiées",
+      "resume": "Contrôle des plaques d'immatriculation illisibles, sales, dissimulées ou falsifiées. Article R317-8. Contravention 4e classe. Procédure APJA et PM Paris.",
+      "mots_cles": ["plaque", "immatriculation", "illisible", "dissimulée", "dissimulee", "falsifiée", "falsifiee", "fausse", "cachée", "cachee", "sale", "boue", "adhésif", "adhesif", "sticker", "autocollant", "bache", "bâche", "mauvais", "entretien", "R317-8", "R317", "contravention", "4e", "classe", "infraction", "véhicule", "vehicule", "voiture", "moto", "deux-roues", "contrôle", "controle", "verbalisation", "procédure", "APJA", "DPMP", "Paris"],
+      "date": "Mars 2025",
+      "fichier": "Fiche doctrine - Plaques d'immatriculation illisibles Vdef - mars 2025.pdf",
+      "type": "doctrine"
+    },
+    {
+      "id": 9,
+      "titre": "Fiche doctrine - Prise en charge des personnes transgenres",
+      "resume": "Accueil et traitement respectueux des personnes transgenres : fouilles, palpations, GAV, auditions. Respect de l'identité de genre et de la dignité.",
+      "mots_cles": ["transgenre", "trans", "genre", "identité", "identite", "sexe", "LGBT", "LGBTQ", "personne", "accueil", "prise", "charge", "respect", "dignité", "dignite", "procédure", "procedure", "fouille", "palpation", "interrogatoire", "audition", "GAV", "garde", "vue", "cellule", "droits", "humains", "discrimination", "police", "municipale", "DPMP"],
+      "date": "Juin 2022",
+      "fichier": "Fiche doctrine - Prise en charge personnes transgenres Vdef - juin 2022.pdf",
+      "type": "doctrine"
+    },
+    {
+      "id": 10,
+      "titre": "Fiche doctrine - EDPM (Engins de Déplacement Personnel Motorisés)",
+      "resume": "Réglementation complète des EDPM : trottinettes électriques, gyropodes, monoroues. Circulation, stationnement, vitesse max 25 km/h, assurance, âge minimum.",
+      "mots_cles": ["EDPM", "engin", "déplacement", "deplacement", "personnel", "motorisé", "motorise", "trottinette", "électrique", "electrique", "gyropode", "monoroue", "hoverboard", "circulation", "trottoir", "voie", "cyclable", "vitesse", "25", "km/h", "kmh", "infraction", "contravention", "stationnement", "réglementation", "reglementation", "contrôle", "controle", "verbalisation", "procédure", "assurance", "âge", "age", "mineur"],
+      "date": "Juillet 2025",
+      "fichier": "fiche doctrine - EDPM - juillet 2025.pdf",
+      "type": "doctrine"
+    },
+    {
+      "id": 11,
+      "titre": "Fiche doctrine - Contrôle et verbalisation des infractions sur un chantier (hors nuisances sonores)",
+      "resume": "Infractions sur chantiers : signalisation défectueuse, balisage, encombrement voie publique, dépôt matériaux, sécurité. Autorisations et procédures PM.",
+      "mots_cles": ["chantier", "construction", "travaux", "BTP", "infraction", "sécurité", "securite", "signalisation", "balisage", "obstacle", "encombrement", "voie", "publique", "trottoir", "circulation", "autorisation", "permis", "défaut", "defaut", "contravention", "verbalisation", "contrôle", "controle", "procédure", "maire", "police", "municipale", "DPMP", "dépôt", "depot", "matériaux", "materiaux", "gravats"],
+      "date": "Mars 2023",
+      "fichier": "Fiche doctrine - Contrôle et verbalisation des infractions sur un chantier hors nuisances sonores Vdef - mars 2023.pdf",
+      "type": "doctrine"
+    }
+  ],
+  "documents": [
+    {
+      "id": 1,
+      "titre": "Permis moto : permis A1 ou permis 125 (moto légère)",
+      "resume": "Conditions d'obtention du permis A1 (125 cm³) : âge minimum, formation obligatoire, équivalences, démarches administratives. Info service-public.fr.",
+      "mots_cles": ["permis", "moto", "A1", "125", "légère", "leger", "deux-roues", "deux", "roues", "motorisé", "motorise", "cylindrée", "cylindree", "formation", "examen", "conduite", "véhicule", "vehicule"],
+      "date": "Décembre 2025",
+      "fichier": "Permis moto : permis A1 ou permis 125 (moto légère.pdf",
+      "type": "document",
+      "source": "service-public.fr"
+    },
+    {
+      "id": 2,
+      "titre": "Permis moto : permis A2 (moto de puissance intermédiaire)",
+      "resume": "Permis A2 pour motos jusqu'à 35 kW : conditions d'accès, formation 20h, motos bridées, passage au permis A après 2 ans. Info service-public.fr.",
+      "mots_cles": ["permis", "moto", "A2", "puissance", "intermédiaire", "intermediaire", "deux-roues", "deux", "roues", "motorisé", "motorise", "cylindrée", "cylindree", "formation", "examen", "conduite", "véhicule", "vehicule", "bridé", "bride", "35kw"],
+      "date": "Décembre 2025",
+      "fichier": "Permis moto A2 (moto de puissance intermédiaire).pdf",
+      "type": "document",
+      "source": "service-public.fr"
+    },
+    {
+      "id": 3,
+      "titre": "Permis moto : permis A (toutes cylindrées)",
+      "resume": "Permis A pour motos sans limitation de puissance : conditions d'âge (24 ans ou 20 ans avec A2), formation, passage direct ou progressif. Info service-public.fr.",
+      "mots_cles": ["permis", "moto", "A", "toutes", "cylindrées", "cylindrees", "grosse", "forte", "puissance", "deux-roues", "deux", "roues", "motorisé", "motorise", "formation", "examen", "conduite", "véhicule", "vehicule", "gros", "cube", "illimité", "illimite"],
+      "date": "Décembre 2025",
+      "fichier": "Permis moto A.pdf",
+      "type": "document",
+      "source": "service-public.fr"
+    },
+    {
+      "id": 4,
+      "titre": "Permis B : voiture ou camionnette",
+      "resume": "Permis B pour véhicules légers jusqu'à 3,5 tonnes : conditions d'âge, code de la route, épreuve pratique, démarches. Info service-public.fr.",
+      "mots_cles": ["permis", "B", "voiture", "auto", "automobile", "camionnette", "véhicule", "vehicule", "leger", "léger", "tourisme", "VL", "formation", "examen", "conduite", "3.5t", "PTAC", "code"],
+      "date": "Décembre 2025",
+      "fichier": "Permis B : voiture ou camionnette.pdf",
+      "type": "document",
+      "source": "service-public.fr"
+    },
+    {
+      "id": 5,
+      "titre": "Assurance lorsqu'on circule à vélo ou en trottinette électrique",
+      "resume": "Obligations d'assurance responsabilité civile pour cyclistes et utilisateurs de trottinettes électriques (EDPM). Sanctions en cas de défaut. Info service-public.fr.",
+      "mots_cles": ["assurance", "vélo", "velo", "trottinette", "électrique", "electrique", "EDPM", "responsabilité", "responsabilite", "civile", "RC", "obligation", "circulation", "deux-roues", "cycliste"],
+      "date": "Décembre 2025",
+      "fichier": "Assurance lorsqu'on circule à vélo ou en trottinette électrique .pdf",
+      "type": "document",
+      "source": "service-public.fr"
+    },
+    {
+      "id": 6,
+      "titre": "Comment prouver qu'un véhicule est assuré ?",
+      "resume": "Documents à présenter pour justifier l'assurance d'un véhicule : attestation, carte verte, consultation fichier. Contrôle police. Info service-public.fr.",
+      "mots_cles": ["assurance", "preuve", "prouver", "véhicule", "vehicule", "attestation", "carte", "verte", "contrôle", "controle", "vérification", "verification", "police", "justificatif"],
+      "date": "Décembre 2025",
+      "fichier": "Comment prouver qu'un véhicule est assuré .pdf",
+      "type": "document",
+      "source": "service-public.fr"
+    },
+    {
+      "id": 7,
+      "titre": "Brevet de sécurité routière (BSR), catégorie AM du permis de conduire",
+      "resume": "BSR/permis AM pour cyclomoteurs 50 cm³ et voiturettes dès 14 ans : formation 8h obligatoire, ASSR, démarches et équivalences. Info service-public.fr.",
+      "mots_cles": ["BSR", "brevet", "sécurité", "securite", "routière", "routiere", "AM", "permis", "cyclomoteur", "50", "50cc", "scooter", "mobylette", "voiturette", "quadricycle", "14", "ans", "formation", "mineur", "jeune"],
+      "date": "Décembre 2025",
+      "fichier": "Brevet de sécurité routière (BSR), catégorie AM du permis de conduire.pdf",
+      "type": "document",
+      "source": "service-public.fr"
+    },
+    {
+      "id": 8,
+      "titre": "Note de service DPMP - Vélos volés",
+      "resume": "Procédure DPMP pour dépôt de plainte ou main courante en cas de vol de vélo : marquage BICYCODE, fichier Paravol, preuves de propriété à fournir.",
+      "mots_cles": ["vélo", "velo", "volé", "vole", "vol", "bicycle", "bicyclette", "VTT", "VAE", "électrique", "electrique", "DPMP", "note", "service", "procédure", "procedure", "plainte", "dépôt", "depot", "main", "courante", "marquage", "gravage", "BICYCODE", "Paravol", "fichier", "immatriculation", "propriété", "propriete", "preuve"],
+      "date": "Février 2024",
+      "fichier": "DPMP_velos_voles_fev_2024.pdf",
+      "type": "document",
+      "source": "DPMP - Note de service interne"
+    },
+    {
+      "id": 9,
+      "titre": "Règlement des parcs et jardins de Paris",
+      "resume": "Règlement municipal des espaces verts parisiens : horaires, interdictions (chiens, vélos, alcool), préservation de la nature. Sanctions R610-5 et R644-2.",
+      "mots_cles": ["parc", "jardin", "espace", "vert", "végétation", "vegetation", "pelouse", "gazon", "fleur", "arbre", "plantation", "nature", "chien", "animal", "vélo", "velo", "circulation", "interdiction", "défense", "defense", "alcool", "pique-nique", "piquenique", "horaire", "fermeture", "ouverture", "règlement", "reglement", "municipal", "paris", "infraction", "contravention", "R610-5", "R644-2"],
+      "date": "Décembre 2025",
+      "fichier": "Reglement_Parcs_Jardins.pdf",
+      "type": "document",
+      "source": "Ville de Paris"
+    },
+    {
+      "id": 10,
+      "titre": "Code Sanitaire de Paris (Règlement Sanitaire Départemental)",
+      "resume": "Arrêté du 20 novembre 1979 : règles sanitaires applicables à Paris (hygiène, logements insalubres, nuisances, eaux, déchets, établissements). Infractions CSP.",
+      "mots_cles": ["code", "sanitaire", "paris", "département", "departement", "règlement", "reglement", "hygiène", "hygiene", "salubrité", "salubrite", "insalubre", "logement", "habitation", "nuisance", "odeur", "déchet", "dechet", "ordure", "eau", "potable", "eaux", "usées", "usees", "assainissement", "établissement", "etablissement", "restaurant", "commerce", "alimentation", "alimentaire", "infraction", "CSP", "santé", "sante", "publique"],
+      "date": "Novembre 1979",
+      "fichier": "Code_Sanitaire_Paris.pdf",
+      "type": "document",
+      "source": "Légifrance - Préfecture de Paris"
+    },
+    {
+      "id": 11,
+      "titre": "Chiens de Catégorie : Règles et Obligations",
+      "resume": "Réglementation des chiens dangereux (catégories 1 et 2) : obligations du propriétaire, permis de détention, déclaration, vaccination, identification, muselière, laisse. Sanctions pénales L211-1 à L211-29 CRPM.",
+      "mots_cles": ["chien", "catégorie", "categorie", "dangereux", "1", "2", "premier", "deuxième", "deuxieme", "pit-bull", "pitbull", "rottweiler", "staffordshire", "mastiff", "tosa", "permis", "détention", "detention", "propriétaire", "proprietaire", "maître", "maitre", "obligation", "déclaration", "declaration", "mairie", "maire", "identification", "puce", "tatouage", "vaccination", "rage", "muselière", "museliere", "laisse", "attestation", "formation", "aptitude", "évaluation", "evaluation", "comportementale", "vétérinaire", "veterinaire", "interdiction", "espace", "public", "transport", "infraction", "sanction", "pénale", "penale", "L211", "CRPM", "code", "rural"],
+      "date": "Décembre 2025",
+      "fichier": "Chiens_categorie_regles.pdf",
+      "type": "document",
+      "source": "Service Public"
+    }
+  ]
+}

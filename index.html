@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LexParRef - Référence Juridique</title>
+  
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="admin-styles.css">
+  <meta name="theme-color" content="#2c3e50">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-content">
+      <div class="logo-section">
+        <img src="police-logo.jpg" alt="Police Municipale DT Centre" class="header-logo">
+        <div>
+          <h1>LexParRef</h1>
+          <p class="subtitle">Référence juridique et procédures</p>
+        </div>
+      </div>
+      <button onclick="toggleAdminLogin()" class="admin-toggle" id="adminBtn">
+        <span id="adminBtnText">🔑 Admin</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MODAL CONNEXION ADMIN -->
+  <div id="adminLoginModal" class="modal-overlay" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>🔐 Connexion Administrateur</h3>
+        <button onclick="closeAdminLogin()" class="close-btn">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="password" id="adminPassword" placeholder="Mot de passe" class="admin-input">
+        <button onclick="checkAdminPassword()" class="admin-login-btn">Se connecter</button>
+        <p class="admin-hint">💡 Mot de passe par défaut : <code>admin123</code></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL ADMIN -->
+  <div id="adminPanel" class="admin-panel" style="display: none;">
+    <div class="admin-header">
+      <h2>👨‍💼 Mode Administrateur</h2>
+      <button onclick="logoutAdmin()" class="logout-btn">🚪 Quitter</button>
+    </div>
+    
+    <div class="admin-sections">
+      <!-- Gestion Procédures -->
+      <div class="admin-section">
+        <h3>📄 Gestion des Procédures État-Major</h3>
+        <div class="procedure-form">
+          <input type="text" id="procTitle" placeholder="Titre de la procédure" class="form-input">
+          <input type="text" id="procKeywords" placeholder="Mots-clés (séparés par des espaces)" class="form-input">
+          <input type="text" id="procFile" placeholder="Nom du fichier PDF" class="form-input">
+          <input type="text" id="procDate" placeholder="Date (ex: Décembre 2025)" class="form-input">
+          <button onclick="addProcedure()" class="add-btn">➕ Ajouter Procédure</button>
+        </div>
+        
+        <div class="procedures-list" id="proceduresList">
+          <!-- Liste des procédures -->
+        </div>
+      </div>
+
+      <!-- Documentation -->
+      <div class="admin-section">
+        <h3>📚 Documentation Utilisateur</h3>
+        <div class="doc-form">
+          <input type="text" id="docTitle" placeholder="Titre de la documentation" class="form-input">
+          <textarea id="docContent" placeholder="Contenu de la documentation" class="form-textarea" rows="4"></textarea>
+          <button onclick="addDocumentation()" class="add-btn">➕ Ajouter Documentation</button>
+        </div>
+        
+        <div class="docs-list" id="docsList">
+          <!-- Liste des documentations -->
+        </div>
+      </div>
+
+      <!-- Statistiques -->
+      <div class="admin-section">
+        <h3>📊 Statistiques</h3>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="totalSearches">0</div>
+            <div class="stat-label">Recherches totales</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="totalProcedures">1</div>
+            <div class="stat-label">Procédures</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">16 977</div>
+            <div class="stat-label">Articles disponibles</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BARRE DE RECHERCHE UNIFIÉE -->
+  <div class="unified-search">
+    <div class="search-box">
+      <input type="text" id="unifiedSearchInput" placeholder="🔍 Rechercher NATINF, article, procédure...">
+      <button onclick="unifiedSearch()" class="search-btn">Rechercher</button>
+    </div>
+    <div class="search-hints">
+      💡 <strong>Exemples :</strong> stationnement gênant • 222-19 • L234-1 • garde à vue • homicide
+    </div>
+  </div>
+
+  <!-- STATISTIQUES / NAVIGATION RÉSULTATS -->
+  <div class="stats">
+    <div class="stat-box" id="resultsNavBox" style="display: none;">
+      <!-- Les boutons seront générés dynamiquement par JavaScript -->
+    </div>
+  </div>
+
+  <!-- RÉSULTATS DE RECHERCHE -->
+  <div id="searchResults" class="results-container"></div>
+
+  <!-- CONTENU LÉGIFRANCE (masqué, garde la recherche d'articles) -->
+  <div id="legifrance-content" style="display: none;">
+    
+    <!-- Recherche d'article -->
+    <div class="legifrance-search">
+      <h3>🔍 Recherche juridique</h3>
+      <div class="article-search-form">
+        <input type="text" id="articleInput" placeholder="Ex: 222-19, homicide involontaire, garde à vue...">
+        <select id="codeSelect">
+          <option value="">🔍 Tous les codes (recherche locale)</option>
+          <option value="LEGITEXT000006070719">📕 Code pénal (CP)</option>
+          <option value="LEGITEXT000006074228">🚗 Code de la route (CR)</option>
+          <option value="LEGITEXT000006071154">📗 Code de procédure pénale (CPP)</option>
+          <option value="CODE_VOIRIE">🛣️ Code de la voirie routière</option>
+          <option value="CODE_CGCT">🏛️ Code général des collectivités territoriales (CGCT)</option>
+          <option value="CODE_CSI">🔒 Code de la sécurité intérieure (CSI)</option>
+        </select>
+        <button onclick="searchArticle()" class="search-btn">🔍 Rechercher</button>
+      </div>
+      <div class="search-help">
+        💡 <strong>Article :</strong> 78-6, 222-19, L234-1 • <strong>Mots-clés :</strong> garde à vue, homicide, vol violence
+      </div>
+    </div>
+
+    <!-- Accès Légifrance -->
+    <h3 class="section-title">🌐 Accès Légifrance (si besoin)</h3>
+    <div class="links-grid">
+      <a href="https://www.legifrance.gouv.fr/" target="_blank" class="link-card">
+        <h3>🔍 Légifrance</h3>
+        <p>Portail officiel - Recherche tous textes</p>
+      </a>
+      <a href="https://www.legifrance.gouv.fr/search/juri" target="_blank" class="link-card">
+        <h3>⚖️ Jurisprudence</h3>
+        <p>Cour de cassation et cours d'appel</p>
+      </a>
+    </div>
+  </div>
+
+
+
+  <script src="script.js"></script>
+  <!-- FOOTER -->
+  <footer class="app-footer">
+    <button onclick="openSourcesModal()" class="sources-btn">
+      ℹ️ Sources et crédits
+    </button>
+  </footer>
+
+  <!-- MODAL SOURCES -->
+  <div id="sourcesModal" class="modal-overlay" style="display: none;">
+    <div class="modal-dialog sources-modal">
+      <div class="modal-header">
+        <h3>📚 Sources et informations</h3>
+        <button onclick="closeSourcesModal()" class="close-btn">✕</button>
+      </div>
+      <div class="modal-body" id="sourcesContent">
+        <div class="loading">Chargement...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js");
+  }
+  </script>
+
+</body>
+</html>

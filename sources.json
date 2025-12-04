@@ -1,0 +1,32 @@
+{
+  "derniere_maj": "4 décembre 2025",
+  "version": "1.0",
+  "sources": {
+    "natinf": {
+      "nom": "Codes NATINF",
+      "date": "Juillet 2025",
+      "origine": "Ministère de la Justice",
+      "nb_entrees": 17008
+    },
+    "codes": {
+      "nom": "Codes juridiques",
+      "date": "Décembre 2025",
+      "origine": "Légifrance",
+      "liste": [
+        "Code Pénal (1292 articles)",
+        "Code de la Route (1160 articles)",
+        "Code de Procédure Pénale (4516 articles)",
+        "Code de la Voirie Routière (324 articles)",
+        "CGCT (6838 articles)",
+        "Code de la Sécurité Intérieure (2847 articles)"
+      ]
+    },
+    "procedures": {
+      "nom": "Fiches doctrine et procédures",
+      "date": "Variable selon fiche",
+      "origine": "État-major Police Municipale"
+    }
+  },
+  "credits": "Application développée par Christophe Dubois - Police Municipale",
+  "contact": ""
+}
