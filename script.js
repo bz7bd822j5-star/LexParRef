@@ -1,3 +1,67 @@
+// ===== SYSTÈME DE MISE À JOUR AUTOMATIQUE =====
+if ('serviceWorker' in navigator) {
+  // Écoute les messages du Service Worker
+  navigator.serviceWorker.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'UPDATE_AVAILABLE') {
+      showUpdateNotification();
+    }
+  });
+  
+  // Enregistre le Service Worker
+  navigator.serviceWorker.register('service-worker.js').then(registration => {
+    // Vérifie les mises à jour toutes les heures
+    setInterval(() => {
+      registration.update();
+    }, 3600000);
+  });
+}
+
+function showUpdateNotification() {
+  const existingBanner = document.getElementById('update-banner');
+  if (existingBanner) return; // Ne pas dupliquer la notification
+  
+  const banner = document.createElement('div');
+  banner.id = 'update-banner';
+  banner.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+    color: white;
+    padding: 15px 20px;
+    text-align: center;
+    z-index: 10000;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    font-weight: bold;
+    cursor: pointer;
+    animation: slideDown 0.3s ease;
+  `;
+  banner.innerHTML = `
+    🔄 <span style="font-size: 16px;">Nouvelle version disponible !</span><br>
+    <span style="font-size: 13px;">Cliquez ici pour mettre à jour</span>
+  `;
+  
+  banner.onclick = () => {
+    if (navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+    }
+    window.location.reload();
+  };
+  
+  document.body.prepend(banner);
+  
+  // Animation CSS
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideDown {
+      from { transform: translateY(-100%); }
+      to { transform: translateY(0); }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
 // ===== GESTION FAVORIS =====
 function initFavorites() {
   const saved = localStorage.getItem('favorites');

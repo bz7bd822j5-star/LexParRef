@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lexparref-v20';
+const CACHE_NAME = 'lexparref-v21';
 const urlsToCache = [
   'index.html',
   'style.css',
@@ -38,16 +38,67 @@ const urlsToCache = [
   'Fiche doctrine - Contrôle et verbalisation des infractions sur un chantier hors nuisances sonores Vdef - mars 2023.pdf'
 ];
 
+// Installation : mise en cache
 self.addEventListener('install', (event) => {
+  self.skipWaiting(); // Force l'activation immédiate
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(urlsToCache))
   );
 });
 
+// Activation : nettoyage des anciens caches
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    }).then(() => {
+      // Notifie tous les clients qu'une mise à jour est disponible
+      return self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+          client.postMessage({
+            type: 'UPDATE_AVAILABLE',
+            version: CACHE_NAME
+          });
+        });
+      });
+    })
+  );
+  return self.clients.claim();
+});
+
+// Interception des requêtes
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request)
-      .then(response => response || fetch(event.request))
+      .then(response => {
+        if (response) {
+          return response;
+        }
+        return fetch(event.request).then(response => {
+          // Clone la réponse car elle ne peut être consommée qu'une fois
+          if (!response || response.status !== 200 || response.type !== 'basic') {
+            return response;
+          }
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseToCache);
+          });
+          return response;
+        });
+      })
   );
+});
+
+// Message pour forcer la mise à jour
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
