@@ -287,7 +287,6 @@ body {
     padding: 12px 0;
   }
 }
-}
 
 /* HEADER */
 header {
@@ -450,7 +449,6 @@ header h1 {
   text-transform: uppercase;
   min-height: 40px;
   white-space: nowrap;
-}
   letter-spacing: 0.5px;
 }
 
@@ -786,7 +784,6 @@ header h1 {
   font-size: 14px;
   font-weight: bold;
   transition: transform 0.3s ease;
-}
 }
 
 .section-content {
