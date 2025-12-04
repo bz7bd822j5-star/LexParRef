@@ -22,9 +22,14 @@
           <p class="subtitle">Référence juridique et procédures</p>
         </div>
       </div>
-      <button onclick="toggleAdminLogin()" class="admin-toggle" id="adminBtn">
-        <span id="adminBtnText">🔑 Admin</span>
-      </button>
+      <div class="header-actions">
+        <button onclick="toggleDarkMode()" class="dark-mode-toggle" id="darkModeBtn" title="Activer le mode sombre">
+          <span id="darkModeIcon">🌙</span>
+        </button>
+        <button onclick="toggleAdminLogin()" class="admin-toggle" id="adminBtn">
+          <span id="adminBtnText">🔑 Admin</span>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -107,6 +112,9 @@
     <div class="search-box">
       <input type="text" id="unifiedSearchInput" placeholder="🔍 Rechercher NATINF, article, procédure...">
       <button onclick="unifiedSearch()" class="search-btn">Rechercher</button>
+      <button onclick="showFavorites()" class="search-btn" id="favoritesBtn" title="Voir vos favoris">
+        ⭐ <span id="favoritesCount">0</span>
+      </button>
     </div>
     <div class="search-hints">
       💡 <strong>Exemples :</strong> stationnement gênant • 222-19 • L234-1 • garde à vue • homicide

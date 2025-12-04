@@ -1,3 +1,162 @@
+// ===== GESTION FAVORIS =====
+function initFavorites() {
+  const saved = localStorage.getItem('favorites');
+  return saved ? JSON.parse(saved) : {};
+}
+
+let favorites = initFavorites();
+
+function toggleFavorite(itemId) {
+  if (favorites[itemId]) {
+    delete favorites[itemId];
+  } else {
+    favorites[itemId] = {
+      id: itemId,
+      timestamp: new Date().toISOString()
+    };
+  }
+  localStorage.setItem('favorites', JSON.stringify(favorites));
+  updateFavoriteButtons();
+  updateFavoritesButton();
+}
+
+function isFavorited(itemId) {
+  return !!favorites[itemId];
+}
+
+function updateFavoriteButtons() {
+  document.querySelectorAll('.favorite-btn').forEach(btn => {
+    const itemId = btn.dataset.itemId;
+    if (isFavorited(itemId)) {
+      btn.classList.add('favorited');
+      btn.textContent = '⭐';
+    } else {
+      btn.classList.remove('favorited');
+      btn.textContent = '☆';
+    }
+  });
+}
+
+function getFavoritesCount() {
+  return Object.keys(favorites).length;
+}
+
+function updateFavoritesButton() {
+  const count = getFavoritesCount();
+  const btn = document.getElementById('favoritesCount');
+  if (btn) {
+    btn.textContent = count;
+  }
+}
+
+function showFavorites() {
+  const favoriteIds = Object.keys(favorites);
+  
+  if (favoriteIds.length === 0) {
+    alert('Aucun favori sauvegardé. Utilisez le bouton ⭐ pour ajouter des articles à vos favoris.');
+    return;
+  }
+
+  // Récupérer les articles favoris
+  const favoriteItems = favoriteIds.map(id => {
+    if (id.startsWith('natinf-')) {
+      const numero = id.replace('natinf-', '');
+      return natinfData.find(item => item.numero === numero);
+    } else if (id.startsWith('code-')) {
+      const parts = id.replace('code-', '').split('-');
+      const code = parts[0];
+      const numero = parts.slice(1).join('-');
+      const codeObj = Object.values(codesData).flat().find(item => item && item.code === code && item.numero === numero);
+      return codeObj;
+    }
+  }).filter(Boolean);
+
+  let html = `
+    <div class="results-container">
+      <div class="results-section">
+        <h2 class="section-header">⭐ Mes Favoris (${favoriteItems.length})</h2>
+        <div class="section-content">
+  `;
+
+  favoriteItems.forEach(item => {
+    if (item.numero && item.definiePar) {
+      // C'est un NATINF
+      html += `
+        <div class="result-item natinf-result" onclick="toggleResultDetails(this)">
+          <div class="result-header-line">
+            <div class="result-left">
+              <button class="favorite-btn favorited" onclick="event.stopPropagation(); toggleFavorite('natinf-${item.numero}'); location.reload();" title="Retirer des favoris">⭐</button>
+              <span class="result-badge natinf-badge">NATINF ${item.numero}</span>
+              <span class="result-nature-label">${item.nature}</span>
+            </div>
+            <span class="expand-icon">▼</span>
+          </div>
+          <div class="result-title">${item.qualification}</div>
+          <div class="result-details" style="display: none;">
+            <div class="detail-row"><strong>📖 Défini par:</strong> ${item.definiePar}</div>
+            <div class="detail-row"><strong>⚖️ Réprimé par:</strong> ${item.reprimePar}</div>
+          </div>
+        </div>
+      `;
+    } else if (item.code) {
+      // C'est un code
+      const summary = item.texte.length > 200 ? item.texte.substring(0, 200) + '...' : item.texte;
+      html += `
+        <div class="result-item code-result" onclick="toggleResultDetails(this)">
+          <div class="result-header-line">
+            <div class="result-left">
+              <button class="favorite-btn favorited" onclick="event.stopPropagation(); toggleFavorite('code-${item.code}-${item.numero}'); location.reload();" title="Retirer des favoris">⭐</button>
+              <span class="result-badge code-badge">${item.code}</span>
+              <span class="article-number">Article ${item.numero}</span>
+            </div>
+            <span class="expand-icon">▼</span>
+          </div>
+          <div class="article-summary">${summary}</div>
+          <div class="result-details" style="display: none;">
+            <div class="article-text">${item.texte}</div>
+          </div>
+        </div>
+      `;
+    }
+  });
+
+  html += `
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('resultsContainer').innerHTML = html;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ===== GESTION MODE SOMBRE =====
+function initDarkMode() {
+  const savedMode = localStorage.getItem('darkMode');
+  if (savedMode === 'true') {
+    document.body.classList.add('dark-mode');
+    updateDarkModeIcon(true);
+  }
+}
+
+function toggleDarkMode() {
+  const isDark = document.body.classList.toggle('dark-mode');
+  localStorage.setItem('darkMode', isDark);
+  updateDarkModeIcon(isDark);
+}
+
+function updateDarkModeIcon(isDark) {
+  const icon = document.getElementById('darkModeIcon');
+  const btn = document.getElementById('darkModeBtn');
+  if (isDark) {
+    icon.textContent = '☀️';
+    btn.title = 'Activer le mode clair';
+  } else {
+    icon.textContent = '🌙';
+    btn.title = 'Activer le mode sombre';
+  }
+}
+
 // ===== GESTION AFFICHAGE RÉSULTATS =====
 let visibleSections = {
   'natinf-section': true,
@@ -509,6 +668,9 @@ function applyCurrentFilter() {
             <div class="result-item natinf-result" onclick="toggleResultDetails(this)">
               <div class="result-header-line">
                 <div class="result-left">
+                  <button class="favorite-btn" data-item-id="natinf-${item.numero}" onclick="event.stopPropagation(); toggleFavorite('natinf-${item.numero}');" title="Ajouter aux favoris">
+                    ${isFavorited('natinf-' + item.numero) ? '⭐' : '☆'}
+                  </button>
                   <span class="result-badge natinf-badge">NATINF ${item.numero}</span>
                   <span class="result-nature-label">${item.nature}</span>
                 </div>
@@ -524,6 +686,7 @@ function applyCurrentFilter() {
         </div>
       </div>
     `;
+  }
   }
   
   // CODES JURIDIQUES
@@ -543,6 +706,9 @@ function applyCurrentFilter() {
               <div class="result-item code-result" onclick="toggleResultDetails(this)">
                 <div class="result-header-line">
                   <div class="result-left">
+                    <button class="favorite-btn" data-item-id="code-${item.code}-${item.numero}" onclick="event.stopPropagation(); toggleFavorite('code-${item.code}-${item.numero}');" title="Ajouter aux favoris">
+                      ${isFavorited('code-' + item.code + '-' + item.numero) ? '⭐' : '☆'}
+                    </button>
                     <span class="result-badge code-badge">${item.code}</span>
                     <span class="article-number">Article ${item.numero}</span>
                   </div>
@@ -1092,3 +1258,12 @@ function closeSourcesModal() {
   const modal = document.getElementById('sourcesModal');
   modal.style.display = 'none';
 }
+
+// ===== INITIALISATION =====
+document.addEventListener('DOMContentLoaded', function() {
+  initDarkMode();
+  updateFavoritesButton();
+  loadProceduresJSON();
+  loadAllData();
+  setupSearchListener();
+});
