@@ -687,7 +687,6 @@ function applyCurrentFilter() {
       </div>
     `;
   }
-  }
   
   // CODES JURIDIQUES
   if (codesToShow.length > 0) {
@@ -1260,6 +1259,17 @@ function closeSourcesModal() {
 }
 
 // ===== INITIALISATION =====
+function setupSearchListener() {
+  const searchInput = document.getElementById('unifiedSearchInput');
+  if (searchInput) {
+    searchInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        unifiedSearch();
+      }
+    });
+  }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   initDarkMode();
   updateFavoritesButton();
