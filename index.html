@@ -35,12 +35,7 @@
         </div>
       </div>
       <div class="header-actions">
-        <button onclick="toggleDarkMode()" class="dark-mode-toggle" id="darkModeBtn" title="Activer le mode sombre">
-          <span id="darkModeIcon">🌙</span>
-        </button>
-        <button onclick="toggleAdminLogin()" class="admin-toggle" id="adminBtn">
-          <span id="adminBtnText">🔑 Admin</span>
-        </button>
+        
       </div>
     </div>
   </header>
@@ -120,18 +115,31 @@
   </div>
 
   <!-- BARRE DE RECHERCHE UNIFIÉE -->
-  <div class="unified-search">
-    <div class="search-box">
-      <input type="text" id="unifiedSearchInput" placeholder="🔍 Rechercher NATINF, article, procédure...">
-      <button onclick="unifiedSearch()" class="search-btn">Rechercher</button>
-      <button onclick="showFavorites()" class="favorites-btn" id="favoritesBtn" title="Voir vos favoris">
-        ⭐ <span id="favoritesCount">0</span>
-      </button>
-    </div>
+  <div class="search-box compact">
+  <input
+    type="text"
+    id="unifiedSearchInput"
+    placeholder="Rechercher NATINF, article, procédure…"
+  >
+
+  <!-- Bouton recherche (loupe) -->
+  <button onclick="unifiedSearch()" class="icon-btn search-icon" title="Rechercher">
+    🔍
+  </button>
+
+  <!-- Favoris -->
+  <button onclick="showFavorites()" class="icon-btn" id="favoritesBtn" title="Favoris">
+    ⭐ <span id="favoritesCount">0</span>
+  </button>
+
+  <!-- Terrasses autour -->
+  <button onclick="showNearbyTerrasses()" class="icon-btn" title="Terrasses autour">
+    📍
+  </button>
+</div>
     <div class="search-hints">
-      💡 <strong>Exemples :</strong> stationnement gênant • 222-19 • L234-1 • garde à vue • homicide
+      💡 <strong>Exemples :</strong> stationnement gênant • 222-19 • L234-1 • Natinfs
     </div>
-  </div>
 
   <!-- STATISTIQUES / NAVIGATION RÉSULTATS -->
   <div class="stats">
@@ -191,6 +199,7 @@
 
 
 
+  <script src="terrasses.js"></script>
   <script src="script.js"></script>
   <!-- FOOTER -->
   <footer class="app-footer">
@@ -217,6 +226,5 @@
     navigator.serviceWorker.register("service-worker.js");
   }
   </script>
-<script src="terrasses.js"></script>
 </body>
 </html>

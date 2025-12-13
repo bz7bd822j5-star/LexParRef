@@ -888,6 +888,28 @@ function toggleSectionContent(header) {
   }
 }
 
+// Détecte si la requête correspond à un article de code (ex: 78-6, L234-1, R625-1)
+function isArticleQuery(query) {
+  if (!query) return false;
+  const normalized = query.trim().toUpperCase();
+  const tokens = normalized.split(/\s+/);
+
+  for (const rawToken of tokens) {
+    let token = rawToken.replace(/^(?:ARTICLE|ART)\.?:?/i, '');
+    token = token.replace(/[^A-Z0-9-]/gi, '');
+    if (!token) continue;
+
+    const startsWithLetter = /^[A-Z]/.test(token);
+    const hasHyphen = token.includes('-');
+    if (!startsWithLetter && !hasHyphen) continue;
+    if (!/^[A-Z]?\d+(?:-\d+)*$/i.test(token)) continue;
+
+    return true;
+  }
+
+  return false;
+}
+
 // ===== RECHERCHE UNIFIÉE =====
 function unifiedSearch() {
   console.log('unifiedSearch appelée');
@@ -906,21 +928,27 @@ function unifiedSearch() {
   
   const resultsContainer = document.getElementById('searchResults');
   resultsContainer.innerHTML = '<div class="loading">🔍 Recherche en cours...</div>';
-  
+
   // Lancer les recherches selon le type sélectionné
   let natinfResults = [];
   let codeResults = [];
   let procedureResults = [];
-  
-  if (searchType === 'all' || searchType === 'natinf') {
-    natinfResults = searchInNatinf(query);
-    console.log('Résultats NATINF:', natinfResults.length);
-  }
-  
-  if (searchType === 'all' || searchType === 'codes') {
+  const articleQueryDetected = isArticleQuery(query);
+
+  if (articleQueryDetected) {
+    console.log('Recherche article détectée, lancer uniquement searchInCodes');
     codeResults = searchInCodes(query);
-    procedureResults = searchInProcedures(query);
-    console.log('Résultats Codes:', codeResults.length, 'Procédures:', procedureResults.length);
+  } else {
+    if (searchType === 'all' || searchType === 'natinf') {
+      natinfResults = searchInNatinf(query);
+      console.log('Résultats NATINF:', natinfResults.length);
+    }
+  
+    if (searchType === 'all' || searchType === 'codes') {
+      codeResults = searchInCodes(query);
+      procedureResults = searchInProcedures(query);
+      console.log('Résultats Codes:', codeResults.length, 'Procédures:', procedureResults.length);
+    }
   }
   
   // Afficher les résultats
@@ -1233,6 +1261,8 @@ document.addEventListener('DOMContentLoaded', () => {
   loadProceduresJSON();
   loadSourcesJSON();
   loadAdminData();
+  initDarkMode();
+  updateFavoritesButton();
   
   // Recherche avec Entrée
   const searchInput = document.getElementById('unifiedSearchInput');
@@ -1323,21 +1353,19 @@ function closeSourcesModal() {
 }
 
 // ===== INITIALISATION =====
-function setupSearchListener() {
-  const searchInput = document.getElementById('unifiedSearchInput');
-  if (searchInput) {
-    searchInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        unifiedSearch();
-      }
-    });
-  }
-}
 
-document.addEventListener('DOMContentLoaded', function() {
-  initDarkMode();
-  updateFavoritesButton();
-  loadProceduresJSON();
-  loadAllData();
-  setupSearchListener();
-});
+function showNearbyTerrasses() {
+  if (!navigator.geolocation) {
+    alert("Géolocalisation non disponible");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const { latitude, longitude } = pos.coords;
+      const terrasses = getTerrassesNearby(latitude, longitude, 20);
+      renderTerrassesNearby(terrasses);
+    },
+    () => alert("Impossible de récupérer la position")
+  );
+}
