@@ -962,6 +962,50 @@ function unifiedSearch() {
   }
 }
 
+// ===== RESET RECHERCHE =====
+function resetSearch() {
+  const input = document.getElementById('unifiedSearchInput');
+  if (input) {
+    input.value = '';
+    input.focus();
+  }
+
+  // Réinitialiser les résultats
+  const resultsContainer = document.getElementById('searchResults');
+  if (resultsContainer) {
+    resultsContainer.innerHTML = '';
+  }
+
+  // Masquer la navigation de résultats
+  const navBox = document.getElementById('resultsNavBox');
+  if (navBox) {
+    navBox.style.display = 'none';
+    navBox.innerHTML = '';
+  }
+
+  // Masquer les filtres
+  const filtersEl = document.getElementById('filtersContainer');
+  if (filtersEl) {
+    filtersEl.style.display = 'none';
+  }
+
+  // Réinitialiser l’état interne
+  currentResults = { natinf: [], codes: [], procedures: [] };
+  currentFilter = 'all';
+  visibleSections = {
+    'natinf-section': true,
+    'codes-section': true,
+    'procedures-section': true,
+    'documents-section': true
+  };
+
+  // Remettre le compteur à zéro
+  const countElement = document.getElementById('resultCount');
+  if (countElement) {
+    countElement.textContent = '0';
+  }
+}
+
 // ===== RECHERCHE DANS NATINF =====
 function searchInNatinf(query) {
   const keywords = query.toLowerCase().split(/\s+/).filter(k => k.length > 0);
@@ -1271,6 +1315,19 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.key === 'Enter') {
         unifiedSearch();
       }
+    });
+  }
+
+  // Brancher le bouton reset
+  const resetBtn = document.getElementById('resetSearchBtn');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', resetSearch);
+  }
+
+  // Afficher / masquer dynamiquement le bouton reset
+  if (searchInput && resetBtn) {
+    searchInput.addEventListener('input', () => {
+      resetBtn.style.display = searchInput.value.trim() ? 'flex' : 'none';
     });
   }
   
