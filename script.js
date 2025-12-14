@@ -5,8 +5,8 @@ const GEOLOC_TEST_MODE = true;
 
 // Coordonnées de test – Chantier EC472481 (Paris 2e)
 const GEOLOC_TEST_COORDS = {
-  latitude: 48.86881813916947,
-  longitude: 2.332895354983545
+  latitude: 48.876357519410725,
+  longitude: 2.3556873124752586
 };
 if ('serviceWorker' in navigator) {
   // Écoute les messages du Service Worker
@@ -636,6 +636,85 @@ let currentResults = { natinf: [], codes: [], procedures: [] };
 let currentFilter = 'all';
 let searchType = 'all'; // 'all', 'natinf', 'codes'
 
+// ===== TERRASSES (GÉOLOC) : REGROUPEMENT MÉTIER =====
+function parseLatLonFromGeoPoint(value) {
+  if (value === null || value === undefined) return { lat: NaN, lon: NaN };
+  const s = String(value);
+  const matches = s.match(/-?\d+(?:[\.,]\d+)?/g);
+  if (!matches || matches.length < 2) return { lat: NaN, lon: NaN };
+  const lat = parseFloat(matches[0].replace(',', '.'));
+  const lon = parseFloat(matches[1].replace(',', '.'));
+  return { lat, lon };
+}
+
+function normalizeTerrasseType(rawType) {
+  const s = String(rawType || '').toLowerCase();
+  if (s.includes('contre')) return 'Contre-terrasse';
+  if (s.includes('éphém') || s.includes('ephem') || s.includes('éphémère') || s.includes('ephemere')) return 'Terrasse éphémère';
+  return 'Terrasse trottoir';
+}
+
+function groupTerrassesByEtablissement(geoTerrasses) {
+  const input = Array.isArray(geoTerrasses) ? geoTerrasses : [];
+  const groups = new Map();
+
+  for (const t of input) {
+    const nom = String(t?.nom_enseigne || '').trim() || 'Terrasse déclarée';
+    const adresse =
+      String(t?.adresse || '').trim() ||
+      [t?.numero_voie, t?.nom_voie].filter(Boolean).join(' ').trim();
+
+    const key = `${nom}||${adresse}`.toLowerCase();
+
+    if (!groups.has(key)) {
+      groups.set(key, {
+        key,
+        nom_enseigne: nom,
+        adresse,
+        latitude: NaN,
+        longitude: NaN,
+        types: {}
+      });
+    }
+
+    const g = groups.get(key);
+
+    const tLat = Number.isFinite(t?.latitude) ? t.latitude : parseLatLonFromGeoPoint(t?.geo_point_2d).lat;
+    const tLon = Number.isFinite(t?.longitude) ? t.longitude : parseLatLonFromGeoPoint(t?.geo_point_2d).lon;
+    if (!Number.isFinite(g.latitude) && Number.isFinite(tLat)) g.latitude = tLat;
+    if (!Number.isFinite(g.longitude) && Number.isFinite(tLon)) g.longitude = tLon;
+
+    const typeKey = String(t?.type_terrasse || '').trim() || 'Type non renseigné';
+    if (!Array.isArray(g.types[typeKey])) g.types[typeKey] = [];
+    g.types[typeKey].push(t);
+  }
+
+  return Array.from(groups.values());
+}
+
+function buildApplePlansUrl(lat, lon, label) {
+  const q = encodeURIComponent(String(label || '').trim());
+  if (Number.isFinite(lat) && Number.isFinite(lon)) {
+    return `https://maps.apple.com/?ll=${lat},${lon}${q ? `&q=${q}` : ''}`;
+  }
+  return `https://maps.apple.com/?q=${q}`;
+}
+
+function buildGoogleMapsUrl(lat, lon, label) {
+  const query = (Number.isFinite(lat) && Number.isFinite(lon))
+    ? `${lat},${lon}`
+    : String(label || '').trim();
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+}
+
+function getTerrasseTypeOrder(typeLabel) {
+  const s = String(typeLabel || '').toLowerCase();
+  if (s.includes('trottoir')) return 0;
+  if (s.includes('contre')) return 1;
+  if (s.includes('éphém') || s.includes('ephem') || s.includes('éphémère') || s.includes('ephemere')) return 2;
+  return 3;
+}
+
 // ===== SÉLECTION TYPE DE RECHERCHE =====
 function setSearchType(type) {
   console.log('setSearchType appelé avec:', type);
@@ -674,6 +753,7 @@ function displayUnifiedResults(natinfResults, codeResults, procedureResults, que
   
   const geoTerrasses = currentResults.terrasses || [];
   const geoChantiers = currentResults.chantiers || [];
+  const groupedTerrassesForNav = groupTerrassesByEtablissement(geoTerrasses);
 
   const totalResults =
     natinfResults.length +
@@ -717,12 +797,16 @@ function displayUnifiedResults(natinfResults, codeResults, procedureResults, que
     return;
   }
   
-  // Réinitialiser l'état de visibilité pour les nouveaux résultats (tous masqués au démarrage)
+  // Réinitialiser l'état de visibilité pour les nouveaux résultats
+  // (en géoloc : terrasses/chantiers visibles par défaut, comme avant)
+  const isGeoloc = query === 'Géolocalisation';
   visibleSections = {
     'natinf-section': false,
     'codes-section': false,
     'procedures-section': false,
-    'documents-section': false
+    'documents-section': false,
+    'terrasses-section': isGeoloc && geoTerrasses.length > 0,
+    'chantiers-section': isGeoloc && geoChantiers.length > 0
   };
   
   // Créer les boutons de navigation toggle
@@ -741,10 +825,27 @@ function displayUnifiedResults(natinfResults, codeResults, procedureResults, que
     if (procCount > 0) navButtons.push(`<button class="nav-result-btn" data-section="procedures-section" onclick="toggleSection('procedures-section')">📄 Fiches doctrine (${procCount})</button>`);
     if (docCount > 0) navButtons.push(`<button class="nav-result-btn" data-section="documents-section" onclick="toggleSection('documents-section')">📑 Documents (${docCount})</button>`);
   }
+
+  // GÉOLOC : intégrer Terrasses/Chantiers dans la barre (resultsNavBox) comme NATINF/DOCS
+  if (geoTerrasses.length > 0) {
+    navButtons.push(
+      `<button class="nav-result-btn ${visibleSections['terrasses-section'] ? 'active' : ''}" data-section="terrasses-section" onclick="toggleSection('terrasses-section')">🍽️ TERRASSES (${groupedTerrassesForNav.length})</button>`
+    );
+  }
+  if (geoChantiers.length > 0) {
+    navButtons.push(
+      `<button class="nav-result-btn ${visibleSections['chantiers-section'] ? 'active' : ''}" data-section="chantiers-section" onclick="toggleSection('chantiers-section')">🏗️ CHANTIERS (${geoChantiers.length})</button>`
+    );
+  }
   
   // Remplir la boîte de navigation
-  navBox.innerHTML = navButtons.join(' • ');
-  navBox.style.display = 'block';
+  if (navButtons.length > 0) {
+    navBox.innerHTML = navButtons.join(' • ');
+    navBox.style.display = 'block';
+  } else {
+    navBox.innerHTML = '';
+    navBox.style.display = 'none';
+  }
   
   // Afficher et mettre à jour les filtres
   updateFilterCounts();
@@ -761,16 +862,38 @@ function toggleSection(sectionId) {
   const button = document.querySelector(`[data-section="${sectionId}"]`);
   
   if (section && button) {
-    // Basculer l'état de visibilité
+    const isGeolocSection = sectionId === 'terrasses-section' || sectionId === 'chantiers-section';
+
+    // En géoloc : comportement "filtre" (exclusif) demandé : afficher uniquement la section cliquée.
+    if (isGeolocSection) {
+      const willShow = !visibleSections[sectionId];
+
+      for (const id of Object.keys(visibleSections)) {
+        visibleSections[id] = false;
+        const sec = document.getElementById(id);
+        const btn = document.querySelector(`[data-section="${id}"]`);
+        if (sec) sec.style.display = 'none';
+        if (btn) btn.classList.remove('active');
+      }
+
+      if (willShow) {
+        visibleSections[sectionId] = true;
+        section.style.display = 'block';
+        section.classList.add('section-appear');
+        button.classList.add('active');
+      }
+
+      return;
+    }
+
+    // Mode standard : bascule indépendante (NATINF/Codes/Docs)
     visibleSections[sectionId] = !visibleSections[sectionId];
-    
+
     if (visibleSections[sectionId]) {
-      // Afficher la section
       section.style.display = 'block';
       section.classList.add('section-appear');
       button.classList.add('active');
     } else {
-      // Masquer la section
       section.classList.remove('section-appear');
       button.classList.remove('active');
       setTimeout(() => {
@@ -995,57 +1118,112 @@ function applyCurrentFilter() {
   }
   
   // ===== TERRASSES (GÉOLOC) =====
+  // Rendu aligné sur la structure NATINF/Codes : result-item + result-header-line + result-title + result-details + expand-icon
   if (geoTerrasses.length > 0) {
+    const display = visibleSections['terrasses-section'] ? 'block' : 'none';
+    const groupedTerrasses = groupTerrassesByEtablissement(geoTerrasses);
     html += `
-      <div class="results-section">
-        <h3 class="section-header">🍽️ Terrasses à proximité (${geoTerrasses.length})</h3>
+      <div class="results-section" id="terrasses-section" style="display: ${display};">
+        <h3 class="section-header">🍽️ Terrasses à proximité (${groupedTerrasses.length})</h3>
         <div class="section-content">
-          ${geoTerrasses.map(t => `
-            <div class="result-item terrasse-result" onclick="toggleResultDetails(this)">
+          ${groupedTerrasses.map(g => {
+            const applePlansUrl = buildApplePlansUrl(g.latitude, g.longitude, `${g.nom_enseigne} ${g.adresse}`.trim());
+            const googleMapsUrl = buildGoogleMapsUrl(g.latitude, g.longitude, `${g.nom_enseigne} ${g.adresse}`.trim());
 
-              <div class="result-header-line">
-                <div class="result-left">
-                  <strong class="terrasse-title">
-                    ${t.nom_enseigne || 'Terrasse déclarée'}
-                  </strong>
+            const typeBlocks = Object.entries(g.types || {})
+              .filter(([, items]) => Array.isArray(items) && items.length > 0)
+              .sort(([a], [b]) => {
+                const oa = getTerrasseTypeOrder(a);
+                const ob = getTerrasseTypeOrder(b);
+                if (oa !== ob) return oa - ob;
+                return a.localeCompare(b, 'fr', { sensitivity: 'base' });
+              });
+
+            let siret = '';
+            for (const [, items] of typeBlocks) {
+              for (const t of items) {
+                if (t && typeof t.siret === 'string' && t.siret.trim()) {
+                  siret = t.siret.trim();
+                  break;
+                }
+              }
+              if (siret) break;
+            }
+
+            const hasTrottoir = typeBlocks.some(([label]) => getTerrasseTypeOrder(label) === 0);
+            const hasContre = typeBlocks.some(([label]) => getTerrasseTypeOrder(label) === 1);
+            const hasEphemere = typeBlocks.some(([label]) => getTerrasseTypeOrder(label) === 2);
+            const typesResume = [
+              hasTrottoir ? 'Trottoir' : null,
+              hasContre ? 'Contre-terrasse' : null,
+              hasEphemere ? 'Éphémère' : null
+            ].filter(Boolean).join(' • ');
+
+            return `
+              <div class="result-item terrasse-result" onclick="toggleResultDetails(this)">
+                <div class="result-header-line">
+                  <div class="result-left">
+                    <a href="${applePlansUrl}" target="_blank" class="result-badge code-badge" onclick="event.stopPropagation();">Apple Plans</a>
+                    <a href="${googleMapsUrl}" target="_blank" class="result-badge code-badge" onclick="event.stopPropagation();">Google Maps</a>
+                  </div>
+                  <span class="expand-icon">▼</span>
                 </div>
-                <span class="expand-icon">▼</span>
+                <div class="result-title">${g.nom_enseigne || 'Terrasse déclarée'}${g.adresse ? `<br><span class="result-nature-label">📍 ${g.adresse}</span>` : ''}${typesResume ? `<br><span class="result-nature-label">🪑 ${typesResume}</span>` : ''}</div>
+                <div class="result-details" style="display: none;">
+                  <div class="detail-row">${siret ? `🏢 <strong>SIRET :</strong> ${siret}` : `⚠️ <strong>SIRET non renseigné</strong>`}</div>
+                  ${typeBlocks.map(([typeLabel, items]) => `
+                    <div class="result-summary">
+                      <div class="detail-row"><strong>🪑 ${typeLabel}</strong></div>
+                      ${items.map(t => `
+                        <div class="detail-row">📏 <strong>Dimensions :</strong> ${(t.longueur || t.surface || '?')} × ${(t.largeur || '?')} m</div>
+                        <div class="detail-row">🪧 <strong>Affichette :</strong> ${t.lien ? `<a href="${t.lien}" target="_blank" onclick="event.stopPropagation();">Voir l’autorisation officielle</a>` : `<span>Affichette non fournie</span>`}</div>
+                      `).join('')}
+                    </div>
+                  `).join('')}
+                </div>
               </div>
-
-              <div class="terrasse-summary">
-                📏 <strong>${t.distance_m} m</strong><br>
-                📍 ${t.numero_voie || ''} ${t.nom_voie || ''}
-                ${t.arrondissement ? `(${t.arrondissement})` : ''}<br>
-                ${t.type_terrasse || t.nature ? `🪑 ${t.type_terrasse || t.nature}` : ''}
-              </div>
-
-              <div class="result-details" style="display:none;">
-                ${t.siret ? `<div class="detail-row">🆔 <strong>SIRET :</strong> ${t.siret}</div>` : ''}
-                ${t.surface ? `<div class="detail-row">📐 <strong>Surface autorisée :</strong> ${t.surface} m²</div>` : ''}
-                ${t.periode ? `<div class="detail-row">🕒 <strong>Période :</strong> ${t.periode}</div>` : ''}
-                ${t.affichette ? `<div class="detail-row">🪧 <strong>Affichette :</strong> ${t.affichette}</div>` : ''}
-              </div>
-
-            </div>
-          `).join('')}
+            `;
+          }).join('')}
         </div>
       </div>
     `;
   }
 
   // ===== CHANTIERS (GÉOLOC) =====
+  // Rendu aligné sur la structure NATINF/Codes : result-item + result-header-line + result-title + result-details + expand-icon
   if (geoChantiers.length > 0) {
+    const display = visibleSections['chantiers-section'] ? 'block' : 'none';
     html += `
-      <div class="results-section">
-        <h3 class="section-header">🏗️ Chantiers à proximité (${geoChantiers.length})</h3>
+      <div class="results-section" id="chantiers-section" style="display: ${display};">
         <div class="section-content">
-          ${geoChantiers.map(c => `
-            <div class="result-item">
-              <strong>${c.nature || 'Chantier'}</strong><br>
-              📏 ${c.distance_m} m<br>
-              📅 ${c.dateDebut || '?'} → ${c.dateFin || '?'}
-            </div>
-          `).join('')}
+          ${geoChantiers.map(c => {
+            const distance = typeof c.distance_m === 'number' ? c.distance_m : (c.distance_m || '?');
+            const cp = (c.cp || '').trim();
+            const arrondissement = /^750\d{2}$/.test(cp) ? `Paris ${parseInt(cp.slice(-2), 10)}e` : '';
+            const localisation = [arrondissement, cp ? `(${cp})` : ''].filter(Boolean).join(' ').trim();
+
+            return `
+              <div class="result-item chantier-result" onclick="toggleResultDetails(this)">
+                <div class="result-header-line">
+                  <div class="result-left">
+                    <span class="result-badge code-badge">CHANTIER</span>
+                    <span class="article-number">📏 ${distance} m</span>
+                  </div>
+                  <span class="expand-icon">▼</span>
+                </div>
+                <div class="result-title">${c.nature || 'Chantier'}${localisation ? `<br><span class="result-nature-label">📍 ${localisation}</span>` : ''}</div>
+                <div class="result-details" style="display: none;">
+                  ${(c.dateDebut || c.dateFin) ? `<div class="detail-row">📅 <strong>Dates :</strong> ${c.dateDebut || '?'} → ${c.dateFin || '?'}</div>` : ''}
+                  ${c.maitriseOuvrage ? `<div class="detail-row">🏢 <strong>Maître d’ouvrage :</strong> ${c.maitriseOuvrage}</div>` : ''}
+                  ${c.responsable ? `<div class="detail-row">👤 <strong>Responsable :</strong> ${c.responsable}</div>` : ''}
+                  ${c.surface ? `<div class="detail-row">📐 <strong>Surface :</strong> ${c.surface}</div>` : ''}
+                  ${c.encombrement ? `<div class="detail-row">🚧 <strong>Encombrement :</strong> ${c.encombrement}</div>` : ''}
+                  ${c.impactStationnement ? `<div class="detail-row">🅿️ <strong>Impact stationnement :</strong> ${c.impactStationnement}</div>` : ''}
+                  ${c.reference ? `<div class="detail-row">🔖 <strong>Référence :</strong> ${c.reference}</div>` : ''}
+                </div>
+              </div>
+            `;
+          }).join('')}
         </div>
       </div>
     `;
@@ -1192,14 +1370,20 @@ function resetSearch() {
   }
 
   // Réinitialiser l’état interne
-  currentResults = { natinf: [], codes: [], procedures: [] };
+  currentResults = { natinf: [], codes: [], procedures: [], terrasses: [], chantiers: [] };
   currentFilter = 'all';
   visibleSections = {
     'natinf-section': true,
     'codes-section': true,
     'procedures-section': true,
-    'documents-section': true
+    'documents-section': true,
+    'terrasses-section': true,
+    'chantiers-section': true
   };
+
+  // Réappliquer la règle d’affichage du bouton reset (géoloc ou saisie)
+  const resetBtn = document.getElementById('resetSearchBtn');
+  if (resetBtn) resetBtn.style.display = 'none';
 
   // Remettre le compteur à zéro
   const countElement = document.getElementById('resultCount');
@@ -1671,4 +1855,3 @@ function handleGeolocSearch(radiusMeters = 20) {
     () => alert("Impossible de récupérer la position")
   );
 }
-

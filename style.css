@@ -713,6 +713,37 @@ header h1 {
   letter-spacing: 0.3px;
 }
 
+/* GÉOLOC ALIGNEMENT NATINF */
+/* Terrasses/Chantiers : header visuellement identique à NATINF/Codes (.collapsible-header),
+   sans toucher au HTML/JS (flèche ajoutée via pseudo-élément). */
+h3.section-header:not(.collapsible-header) {
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 18px;
+  background: linear-gradient(135deg, #0D2E4E 0%, #1A4D7A 100%);
+  color: white;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  border: 2px solid #D4A574;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  font-weight: 700;
+}
+
+h3.section-header:not(.collapsible-header):hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(13, 46, 78, 0.35);
+  border-color: #E5B896;
+}
+
+h3.section-header:not(.collapsible-header)::after {
+  content: "▼";
+  font-size: 14px;
+  font-weight: bold;
+  transition: transform 0.3s ease;
+}
+
 .collapsible-header {
   cursor: pointer;
   display: flex;
@@ -840,6 +871,18 @@ header h1 {
   margin: 8px 0;
 }
 
+/* GÉOLOC ALIGNEMENT NATINF */
+/* Hiérarchie : quand une adresse est injectée sous le titre (ex: Terrasses/Chantiers),
+   la rendre visuellement équivalente à un sous-titre NATINF. */
+.result-title > .result-nature-label {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  opacity: 0.75;
+}
+
 .result-summary {
   font-size: 13px;
   color: var(--text-secondary);
@@ -894,6 +937,18 @@ header h1 {
 .detail-row strong {
   color: #2c3e50;
   font-weight: 700;
+}
+
+/* GÉOLOC ALIGNEMENT NATINF */
+/* Détails Terrasses/Chantiers : forcer les couleurs sur les variables NATINF pour garantir le contraste. */
+.terrasse-result .detail-row,
+.chantier-result .detail-row {
+  color: var(--text-secondary);
+}
+
+.terrasse-result .detail-row strong,
+.chantier-result .detail-row strong {
+  color: var(--text-primary);
 }
 
 .article-summary {
@@ -1898,79 +1953,10 @@ header h1 {
 }
 
 /* =========================
-   TERRASSES – TIROIR (DARK MODE)
-   ========================= */
-
-.terrasse-result,
-.terrasse-item {
-  background: rgba(19, 47, 76, 0.85);
-  color: #e3f2fd;
-  border: 1px solid rgba(227, 242, 253, 0.15);
-}
-
-.terrasse-item.expanded {
-  background: rgba(19, 47, 76, 0.95);
-  color: #ffffff;
-}
-
-/* Nom de l’enseigne */
-.terrasse-name,
-.terrasse-title {
-  font-size: 16px;
-  font-weight: 800;
-  color: #ffffff;
-  margin-bottom: 6px;
-}
-
-/* Distance + adresse */
-.terrasse-meta {
-  font-size: 13px;
-  color: rgba(227, 242, 253, 0.85);
-  margin-bottom: 6px;
-}
-
-/* Badge type / nature */
-.terrasse-badge,
-.terrasse-type {
-  display: inline-block;
-  background: rgba(227, 242, 253, 0.12);
-  color: #ffffff;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 12px;
-  margin-bottom: 8px;
-}
-
-/* Détails déroulés */
-.terrasse-details {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(227, 242, 253, 0.2);
-  font-size: 13px;
-  color: rgba(227, 242, 253, 0.9);
-}
-
-.terrasse-item.expanded .terrasse-details {
-  background: transparent;
-}
-
-/* Lignes de détail */
-.terrasse-details .detail-row {
-  padding: 6px 0;
-  line-height: 1.6;
-}
-
-.terrasse-details .detail-row strong {
-  color: #ffffff;
-}
-
-/* Icône ouverture */
-.terrasse-toggle,
-.expand-icon {
-  color: #ffffff;
-  font-weight: 900;
-}
+   TERRASSES / CHANTIERS (GÉOLOC)
+   =========================
+   Les items utilisent la même structure que NATINF/Codes : `.result-item`, `.result-header-line`,
+   `.result-title`, `.result-details`, `.expand-icon`. Aucun style spécifique requis ici. */
 
 /* =========================
    RESET – VISIBILITÉ GÉOLOC
