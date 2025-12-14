@@ -75,26 +75,32 @@
 
 	const headers = parseLine(lines[0]);
 
-	return lines.slice(1).map(line => {
-		const values = parseLine(line);
-		const row = {};
+		return lines.slice(1).map(line => {
+			const values = parseLine(line);
+			const row = {};
 
-		headers.forEach((h, i) => {
-			row[h] = values[i] ?? '';
+			headers.forEach((h, i) => {
+				row[h] = values[i] ?? '';
+			});
+
+			return {
+				type_terrasse: values[0]?.trim(),
+				adresse: values[1]?.trim(),
+				code_postal: values[2]?.trim(),
+				nom_enseigne: values[3]?.trim(),
+				siret: values[5]?.trim(),
+				surface: values[6]?.trim(),
+				largeur: values[7]?.trim(),
+				lien: values[9]?.trim(),
+				geo_point_2d: values[11]?.trim(),
+
+				// Champs de compatibilité utilisés par le rendu géoloc existant
+				numero_voie: values[1] ? values[1].trim().split(/\s+/)[0] : '',
+				nom_voie: values[1] ? values[1].trim().split(/\s+/).slice(1).join(' ') : '',
+				arrondissement: values[2]?.trim()
+			};
 		});
-
-		return {
-			id: row.id || row.ID || '',
-			nom_enseigne: row.nom_enseigne || row.nom || row['Nom de l\'enseigne'] || '',
-			numero_voie: row.numero_voie || row['Numéro'] || '',
-			voie: row.voie || row['Voie'] || '',
-			arrondissement: row.arrondissement || row['Arrondissement'] || '',
-			geo_point_2d: row.geo_point_2d || row['geo_point_2d'] || row['Geo Point'] || row['geo_point'] || '',
-			latitude: parseFloat(String(row.latitude || '').replace(',', '.')),
-			longitude: parseFloat(String(row.longitude || '').replace(',', '.'))
-		};
-	});
-}
+	}
 
 	/* ================================
 	   4. UTILITAIRE DISTANCE (HAVERSINE)
