@@ -1,4 +1,13 @@
 // ===== SYSTÈME DE MISE À JOUR AUTOMATIQUE =====
+// ===== MODE TEST GÉOLOCALISATION =====
+// À passer à false en production
+const GEOLOC_TEST_MODE = true;
+
+// Coordonnées de test – Chantier EC472481 (Paris 2e)
+const GEOLOC_TEST_COORDS = {
+  latitude: 48.86881813916947,
+  longitude: 2.332895354983545
+};
 if ('serviceWorker' in navigator) {
   // Écoute les messages du Service Worker
   navigator.serviceWorker.addEventListener('message', (event) => {
@@ -232,6 +241,101 @@ let visibleSections = {
 // ===== DONNÉES NATINF =====
 let natinfData = [];
 let filteredData = [];
+
+// ===== DONNÉES CHANTIERS =====
+let chantiersData = [];
+// Charger le CSV chantiers
+async function loadChantiersData() {
+  try {
+    const response = await fetch('chantiers-a-paris.csv');
+    const csvText = await response.text();
+
+    const lines = csvText.split('\n');
+    chantiersData = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      if (!lines[i].trim()) continue;
+
+      const values = lines[i].split(';');
+
+      chantiersData.push({
+        reference: values[0]?.trim(),
+        cp: values[1]?.trim(),
+        dateDebut: values[2]?.trim(),
+        dateFin: values[3]?.trim(),
+        responsable: values[4]?.trim(),
+        maitriseOuvrage: values[5]?.trim(),
+        surface: values[6]?.trim(),
+        nature: values[7]?.trim(),
+        encombrement: values[8]?.trim(),
+        impactStationnement: values[9]?.trim(),
+        geo_point_2d: values[13]?.trim()
+      });
+    }
+
+    console.log('🏗️ Chantiers chargés :', chantiersData.length);
+  } catch (err) {
+    console.error('❌ Erreur chargement chantiers:', err);
+  }
+}
+// ===== FONCTION DISTANCE (CHANTIERS) =====
+// Ajoutée si computeDistanceMeters n'existe pas déjà
+if (typeof computeDistanceMeters !== "function") {
+function computeDistanceMeters(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const toRad = d => d * Math.PI / 180;
+
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+    Math.sin(dLon / 2) ** 2;
+
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+}
+
+// ===== FILTRAGE DES CHANTIERS À 20 m =====
+function getChantiersNearby(lat, lon, radiusMeters = 20) {
+  if (!Array.isArray(chantiersData)) return [];
+
+  const results = [];
+
+  for (const c of chantiersData) {
+    if (!c.geo_point_2d) continue;
+
+    const parts = c.geo_point_2d.split(',').map(p => parseFloat(p.trim()));
+    if (parts.length !== 2 || isNaN(parts[0]) || isNaN(parts[1])) continue;
+
+    const [cLat, cLon] = parts;
+    const distance = computeDistanceMeters(lat, lon, cLat, cLon);
+
+    if (distance <= radiusMeters) {
+      results.push({
+        ...c,
+        distance_m: Math.round(distance)
+      });
+    }
+  }
+
+  results.sort((a, b) => a.distance_m - b.distance_m);
+  return results;
+}
+// ===== HOOK DE TEST CHANTIERS (console uniquement) =====
+function testChantiersNearby() {
+  if (!navigator.geolocation) {
+    console.warn('Géolocalisation indisponible');
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(pos => {
+    const { latitude, longitude } = pos.coords;
+    const nearby = getChantiersNearby(latitude, longitude, 20);
+    console.log('🏗️ Chantiers à moins de 20 m :', nearby);
+  });
+}
 
 // ===== DONNÉES CODES JURIDIQUES =====
 let codesData = {
@@ -557,25 +661,59 @@ function displayUnifiedResults(natinfResults, codeResults, procedureResults, que
   const container = document.getElementById('searchResults');
   
   // Sauvegarder les résultats pour le filtrage
-  currentResults = {
-    natinf: natinfResults,
-    codes: codeResults,
-    procedures: procedureResults
-  };
+  if (query !== 'Géolocalisation') {
+    currentResults = {
+      natinf: natinfResults,
+      codes: codeResults,
+      procedures: procedureResults,
+      terrasses: [],
+      chantiers: []
+    };
+  }
+  // si Géolocalisation → on conserve currentResults injecté par runGeolocPipeline
   
-  const totalResults = natinfResults.length + codeResults.length + procedureResults.length;
+  const geoTerrasses = currentResults.terrasses || [];
+  const geoChantiers = currentResults.chantiers || [];
+
+  const totalResults =
+    natinfResults.length +
+    codeResults.length +
+    procedureResults.length +
+    geoTerrasses.length +
+    geoChantiers.length;
   
   if (totalResults === 0) {
     const navBox = document.getElementById('resultsNavBox');
     if (navBox) navBox.style.display = 'none';
-    
-    container.innerHTML = `
+
+    const isGeoloc = query === 'Géolocalisation';
+
+    if (isGeoloc) {
+      container.innerHTML = `
+  <div class="no-results">
+    <h3>📍 Aucun élément réglementaire à proximité</h3>
+    <p>
+      Aucune <strong>terrasse</strong> ou <strong>chantier</strong>
+      détectés dans un rayon de <strong>20 mètres</strong> autour de votre position.
+    </p>
+    <p class="help-text">
+      💡 Déplacez-vous de quelques mètres ou relancez la géolocalisation.
+    </p>
+  </div>
+`;
+    } else {
+      container.innerHTML = `
       <div class="no-results">
         <h3>❌ Aucun résultat</h3>
-        <p>Aucun résultat trouvé pour "<strong>${query}</strong>"</p>
-        <p class="help-text">💡 Essayez avec d'autres mots-clés</p>
+        <p>
+          Aucun résultat trouvé pour "<strong>${query}</strong>"
+        </p>
+        <p class="help-text">
+          💡 Essayez avec d'autres mots-clés
+        </p>
       </div>
     `;
+    }
     return;
   }
   
@@ -687,6 +825,10 @@ function filterResults(filterType) {
 
 // ===== APPLICATION DU FILTRE =====
 function applyCurrentFilter() {
+  // Harmonisation géoloc : toujours utiliser les variables locales pour geoTerrasses et geoChantiers
+  const geoTerrasses = currentResults.terrasses || [];
+  const geoChantiers = currentResults.chantiers || [];
+
   const container = document.getElementById('searchResults');
   
   let natinfToShow = currentResults.natinf;
@@ -852,24 +994,84 @@ function applyCurrentFilter() {
     }
   }
   
+  // ===== TERRASSES (GÉOLOC) =====
+  if (geoTerrasses.length > 0) {
+    html += `
+      <div class="results-section">
+        <h3 class="section-header">🍽️ Terrasses à proximité (${geoTerrasses.length})</h3>
+        <div class="section-content">
+          ${geoTerrasses.map(t => `
+            <div class="result-item terrasse-result" onclick="toggleResultDetails(this)">
+
+              <div class="result-header-line">
+                <div class="result-left">
+                  <strong class="terrasse-title">
+                    ${t.nom_enseigne || 'Terrasse déclarée'}
+                  </strong>
+                </div>
+                <span class="expand-icon">▼</span>
+              </div>
+
+              <div class="terrasse-summary">
+                📏 <strong>${t.distance_m} m</strong><br>
+                📍 ${t.numero_voie || ''} ${t.nom_voie || ''}
+                ${t.arrondissement ? `(${t.arrondissement})` : ''}<br>
+                ${t.type_terrasse || t.nature ? `🪑 ${t.type_terrasse || t.nature}` : ''}
+              </div>
+
+              <div class="result-details" style="display:none;">
+                ${t.siret ? `<div class="detail-row">🆔 <strong>SIRET :</strong> ${t.siret}</div>` : ''}
+                ${t.surface ? `<div class="detail-row">📐 <strong>Surface autorisée :</strong> ${t.surface} m²</div>` : ''}
+                ${t.periode ? `<div class="detail-row">🕒 <strong>Période :</strong> ${t.periode}</div>` : ''}
+                ${t.affichette ? `<div class="detail-row">🪧 <strong>Affichette :</strong> ${t.affichette}</div>` : ''}
+              </div>
+
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  // ===== CHANTIERS (GÉOLOC) =====
+  if (geoChantiers.length > 0) {
+    html += `
+      <div class="results-section">
+        <h3 class="section-header">🏗️ Chantiers à proximité (${geoChantiers.length})</h3>
+        <div class="section-content">
+          ${geoChantiers.map(c => `
+            <div class="result-item">
+              <strong>${c.nature || 'Chantier'}</strong><br>
+              📏 ${c.distance_m} m<br>
+              📅 ${c.dateDebut || '?'} → ${c.dateFin || '?'}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
   container.innerHTML = html;
 }
 
 // ===== TOGGLE DÉTAILS =====
 function toggleResultDetails(element) {
   const details = element.querySelector('.result-details');
+  if (!details) return;
+
   const summary = element.querySelector('.article-summary');
   const icon = element.querySelector('.expand-icon');
-  
-  if (details.style.display === 'none') {
+
+  const isHidden = details.style.display === 'none' || details.style.display === '';
+
+  if (isHidden) {
     details.style.display = 'block';
     if (summary) summary.style.display = 'none';
-    icon.textContent = '▲';
+    if (icon) icon.textContent = '▲';
     element.classList.add('expanded');
   } else {
     details.style.display = 'none';
     if (summary) summary.style.display = 'block';
-    icon.textContent = '▼';
+    if (icon) icon.textContent = '▼';
     element.classList.remove('expanded');
   }
 }
@@ -1307,6 +1509,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadAdminData();
   initDarkMode();
   updateFavoritesButton();
+  loadChantiersData();
   
   // Recherche avec Entrée
   const searchInput = document.getElementById('unifiedSearchInput');
@@ -1411,7 +1614,50 @@ function closeSourcesModal() {
 
 // ===== INITIALISATION =====
 
-function showNearbyTerrasses() {
+// ===== PIPELINE GÉOLOCALISATION UNIFIÉE =====
+function runGeolocPipeline(latitude, longitude, radiusMeters) {
+  const terrasses = typeof getTerrassesNearby === 'function'
+    ? getTerrassesNearby(latitude, longitude, radiusMeters)
+    : [];
+
+  const chantiers = typeof getChantiersNearby === 'function'
+    ? getChantiersNearby(latitude, longitude, radiusMeters)
+    : [];
+
+  // Injection dans le moteur unifié (comme NATINF / Codes / Docs)
+  currentResults = {
+    natinf: [],
+    codes: [],
+    procedures: [],
+    terrasses,
+    chantiers
+  };
+
+  console.log('📍 Géoloc pipeline (test ou réel)', {
+    lat: latitude,
+    lon: longitude,
+    terrasses: terrasses.length,
+    chantiers: chantiers.length
+  });
+  // Afficher le bouton reset en mode géolocalisation
+  const resetBtn = document.getElementById('resetSearchBtn');
+  if (resetBtn) {
+    resetBtn.style.display = 'flex';
+  }
+
+  displayUnifiedResults([], [], [], 'Géolocalisation');
+}
+
+// ===== RECHERCHE GÉOLOCALISÉE UNIFIÉE =====
+function handleGeolocSearch(radiusMeters = 20) {
+  // MODE TEST : utile hors Paris / Safari local
+  if (GEOLOC_TEST_MODE) {
+    console.warn('🧪 MODE TEST GÉOLOC ACTIF');
+    const { latitude, longitude } = GEOLOC_TEST_COORDS;
+    runGeolocPipeline(latitude, longitude, radiusMeters);
+    return;
+  }
+
   if (!navigator.geolocation) {
     alert("Géolocalisation non disponible");
     return;
@@ -1420,9 +1666,9 @@ function showNearbyTerrasses() {
   navigator.geolocation.getCurrentPosition(
     pos => {
       const { latitude, longitude } = pos.coords;
-      const terrasses = getTerrassesNearby(latitude, longitude, 20);
-      renderTerrassesNearby(terrasses);
+      runGeolocPipeline(latitude, longitude, radiusMeters);
     },
     () => alert("Impossible de récupérer la position")
   );
 }
+

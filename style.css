@@ -1896,3 +1896,101 @@ header h1 {
 .reset-btn:hover {
   opacity: 0.85;
 }
+
+/* =========================
+   TERRASSES – TIROIR (DARK MODE)
+   ========================= */
+
+.terrasse-result,
+.terrasse-item {
+  background: rgba(19, 47, 76, 0.85);
+  color: #e3f2fd;
+  border: 1px solid rgba(227, 242, 253, 0.15);
+}
+
+.terrasse-item.expanded {
+  background: rgba(19, 47, 76, 0.95);
+  color: #ffffff;
+}
+
+/* Nom de l’enseigne */
+.terrasse-name,
+.terrasse-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+
+/* Distance + adresse */
+.terrasse-meta {
+  font-size: 13px;
+  color: rgba(227, 242, 253, 0.85);
+  margin-bottom: 6px;
+}
+
+/* Badge type / nature */
+.terrasse-badge,
+.terrasse-type {
+  display: inline-block;
+  background: rgba(227, 242, 253, 0.12);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+/* Détails déroulés */
+.terrasse-details {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(227, 242, 253, 0.2);
+  font-size: 13px;
+  color: rgba(227, 242, 253, 0.9);
+}
+
+.terrasse-item.expanded .terrasse-details {
+  background: transparent;
+}
+
+/* Lignes de détail */
+.terrasse-details .detail-row {
+  padding: 6px 0;
+  line-height: 1.6;
+}
+
+.terrasse-details .detail-row strong {
+  color: #ffffff;
+}
+
+/* Icône ouverture */
+.terrasse-toggle,
+.expand-icon {
+  color: #ffffff;
+  font-weight: 900;
+}
+
+/* =========================
+   RESET – VISIBILITÉ GÉOLOC
+   ========================= */
+
+/* Bouton reset visible quand actif */
+
+/* Forcer la visibilité du bouton RESET en géoloc (Terrasses / Chantiers / Travaux) */
+.reset-btn {
+  background: rgba(227, 242, 253, 0.12);
+  border: 1px solid rgba(227, 242, 253, 0.25);
+  color: #ffffff;
+}
+
+.reset-btn.active {
+  display: flex !important;
+  opacity: 1;
+}
+
+/* Désactiver reset en mode géolocalisation */
+body.geoloc-active .reset-btn {
+  display: none !important;
+}
