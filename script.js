@@ -1,13 +1,4 @@
 // ===== SYSTÈME DE MISE À JOUR AUTOMATIQUE =====
-// ===== MODE TEST GÉOLOCALISATION =====
-// À passer à false en production
-const GEOLOC_TEST_MODE = true;
-
-// Coordonnées de test – Chantier EC472481 (Paris 2e)
-const GEOLOC_TEST_COORDS = {
-  latitude: 48.876357519410725,
-  longitude: 2.3556873124752586
-};
 if ('serviceWorker' in navigator) {
   // Écoute les messages du Service Worker
   navigator.serviceWorker.addEventListener('message', (event) => {
@@ -1907,7 +1898,7 @@ function runGeolocPipeline(latitude, longitude, radiusMeters) {
     chantiers
   };
 
-  console.log('📍 Géoloc pipeline (test ou réel)', {
+  console.log('📍 Géoloc pipeline', {
     lat: latitude,
     lon: longitude,
     terrasses: terrasses.length,
@@ -1924,14 +1915,6 @@ function runGeolocPipeline(latitude, longitude, radiusMeters) {
 
 // ===== RECHERCHE GÉOLOCALISÉE UNIFIÉE =====
 function handleGeolocSearch(radiusMeters = 20) {
-  // MODE TEST : utile hors Paris / Safari local
-  if (GEOLOC_TEST_MODE) {
-    console.warn('🧪 MODE TEST GÉOLOC ACTIF');
-    const { latitude, longitude } = GEOLOC_TEST_COORDS;
-    runGeolocPipeline(latitude, longitude, radiusMeters);
-    return;
-  }
-
   if (!navigator.geolocation) {
     alert("Géolocalisation non disponible");
     return;
