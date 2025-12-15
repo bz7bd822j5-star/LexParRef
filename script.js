@@ -715,6 +715,87 @@ function getTerrasseTypeOrder(typeLabel) {
   return 3;
 }
 
+// ===== TERRASSES : SIRET (copie + annuaire) =====
+function normalizeSiret(raw) {
+  if (raw === null || raw === undefined) return '';
+  const digits = String(raw).replace(/\D/g, '');
+  return digits.length === 14 ? digits : '';
+}
+
+function formatSiret(raw) {
+  const siret = normalizeSiret(raw);
+  if (!siret) return '';
+  // Format usuel : 123 456 789 00012
+  return `${siret.slice(0, 3)} ${siret.slice(3, 6)} ${siret.slice(6, 9)} ${siret.slice(9)}`;
+}
+
+function buildAnnuaireEntrepriseUrl(siret) {
+  const normalized = normalizeSiret(siret);
+  if (!normalized) return '';
+  return `https://annuaire-entreprises.data.gouv.fr/entreprise/${normalized}`;
+}
+
+function fallbackCopyTextToClipboard(text) {
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = String(text);
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '-9999px';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, ta.value.length);
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return ok;
+  } catch (e) {
+    return false;
+  }
+}
+
+async function copySiretToClipboard(siret, buttonEl) {
+  const normalized = normalizeSiret(siret);
+  if (!normalized) return false;
+
+  const prevTitle = buttonEl?.title;
+  const prevText = buttonEl?.textContent;
+  const setFeedback = (title, text) => {
+    if (buttonEl) {
+      if (typeof title === 'string') buttonEl.title = title;
+      if (typeof text === 'string') buttonEl.textContent = text;
+    }
+  };
+  const resetFeedback = () => {
+    if (buttonEl) {
+      if (typeof prevTitle === 'string') buttonEl.title = prevTitle;
+      if (typeof prevText === 'string') buttonEl.textContent = prevText;
+    }
+  };
+
+  try {
+    if (navigator?.clipboard?.writeText) {
+      await navigator.clipboard.writeText(normalized);
+      setFeedback('Copié', '✅');
+      setTimeout(resetFeedback, 900);
+      return true;
+    }
+  } catch (e) {
+    // On bascule en fallback
+  }
+
+  const ok = fallbackCopyTextToClipboard(normalized);
+  if (ok) {
+    setFeedback('Copié', '✅');
+    setTimeout(resetFeedback, 900);
+    return true;
+  }
+
+  setFeedback('Copie impossible', '⚠️');
+  setTimeout(resetFeedback, 1200);
+  return false;
+}
+
 // ===== SÉLECTION TYPE DE RECHERCHE =====
 function setSearchType(type) {
   console.log('setSearchType appelé avec:', type);
@@ -1139,21 +1220,24 @@ function applyCurrentFilter() {
                 return a.localeCompare(b, 'fr', { sensitivity: 'base' });
               });
 
-            let siret = '';
-            for (const [, items] of typeBlocks) {
-              for (const t of items) {
-                if (t && typeof t.siret === 'string' && t.siret.trim()) {
-                  siret = t.siret.trim();
-                  break;
-                }
-              }
-              if (siret) break;
-            }
+	            let siret = '';
+	            for (const [, items] of typeBlocks) {
+	              for (const t of items) {
+	                if (t && typeof t.siret === 'string' && t.siret.trim()) {
+	                  siret = t.siret.trim();
+	                  break;
+	                }
+	              }
+	              if (siret) break;
+	            }
+	            const siretNormalized = normalizeSiret(siret);
+	            const siretDisplay = siretNormalized ? formatSiret(siretNormalized) : '';
+	            const annuaireUrl = siretNormalized ? buildAnnuaireEntrepriseUrl(siretNormalized) : '';
 
-            const hasTrottoir = typeBlocks.some(([label]) => getTerrasseTypeOrder(label) === 0);
-            const hasContre = typeBlocks.some(([label]) => getTerrasseTypeOrder(label) === 1);
-            const hasEphemere = typeBlocks.some(([label]) => getTerrasseTypeOrder(label) === 2);
-            const typesResume = [
+	            const hasTrottoir = typeBlocks.some(([label]) => getTerrasseTypeOrder(label) === 0);
+	            const hasContre = typeBlocks.some(([label]) => getTerrasseTypeOrder(label) === 1);
+	            const hasEphemere = typeBlocks.some(([label]) => getTerrasseTypeOrder(label) === 2);
+	            const typesResume = [
               hasTrottoir ? 'Trottoir' : null,
               hasContre ? 'Contre-terrasse' : null,
               hasEphemere ? 'Éphémère' : null
@@ -1167,15 +1251,21 @@ function applyCurrentFilter() {
                     <a href="${googleMapsUrl}" target="_blank" class="result-badge code-badge" onclick="event.stopPropagation();">Google Maps</a>
                   </div>
                   <span class="expand-icon">▼</span>
-                </div>
-                <div class="result-title">${g.nom_enseigne || 'Terrasse déclarée'}${g.adresse ? `<br><span class="result-nature-label">📍 ${g.adresse}</span>` : ''}${typesResume ? `<br><span class="result-nature-label">🪑 ${typesResume}</span>` : ''}</div>
-                <div class="result-details" style="display: none;">
-                  <div class="detail-row">${siret ? `🏢 <strong>SIRET :</strong> ${siret}` : `⚠️ <strong>SIRET non renseigné</strong>`}</div>
-                  ${typeBlocks.map(([typeLabel, items]) => `
-                    <div class="result-summary">
-                      <div class="detail-row"><strong>🪑 ${typeLabel}</strong></div>
-                      ${items.map(t => `
-                        <div class="detail-row">📏 <strong>Dimensions :</strong> ${(t.longueur || t.surface || '?')} × ${(t.largeur || '?')} m</div>
+	                </div>
+	                <div class="result-title">${g.nom_enseigne || 'Terrasse déclarée'}${g.adresse ? `<br><span class="result-nature-label">📍 ${g.adresse}</span>` : ''}${typesResume ? `<br><span class="result-nature-label">🪑 ${typesResume}</span>` : ''}</div>
+	                <div class="result-details" style="display: none;">
+	                  <div class="detail-row">${
+	                    siretNormalized
+	                      ? `🏢 <strong>SIRET :</strong> <span>${siretDisplay}</span>
+	                         <button type="button" onclick="event.stopPropagation(); copySiretToClipboard('${siretNormalized}', this);" title="Copier le SIRET" style="margin-left:6px;">📋</button>
+	                         <a href="${annuaireUrl}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();" title="Ouvrir dans l’annuaire des entreprises" style="margin-left:6px; text-decoration:none;">🔗</a>`
+	                      : `⚠️ <strong>SIRET obligatoire (terrasses)</strong>`
+	                  }</div>
+	                  ${typeBlocks.map(([typeLabel, items]) => `
+	                    <div class="result-summary">
+	                      <div class="detail-row"><strong>🪑 ${typeLabel}</strong></div>
+	                      ${items.map(t => `
+	                        <div class="detail-row">📏 <strong>Dimensions :</strong> ${(t.longueur || t.surface || '?')} × ${(t.largeur || '?')} m</div>
                         <div class="detail-row">🪧 <strong>Affichette :</strong> ${t.lien ? `<a href="${t.lien}" target="_blank" onclick="event.stopPropagation();">Voir l’autorisation officielle</a>` : `<span>Affichette non fournie</span>`}</div>
                       `).join('')}
                     </div>
